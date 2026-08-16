@@ -1,0 +1,168 @@
+Option Explicit
+
+Sub btnTestConnection()
+    
+    Dim cn As ADODB.Connection
+    Dim rs As ADODB.Recordset
+    Dim fid As ADODB.FieldAttributeEnum
+    Dim mssql As String
+    
+    Dim servername As String
+    Dim userid As String
+    Dim pwd As String
+    Dim database As String
+    
+    servername = Sheets("SQLParams").Range("B2")
+    userid = Sheets("SQLParams").Range("B3")
+    pwd = Sheets("SQLParams").Range("B4")
+    database = Sheets("SQLParams").Range("B5")
+    
+    Set cn = New ADODB.Connection
+    Set rs = New ADODB.Recordset
+    
+    If Sheets("SQLParams").Range("C5").Value = True Then
+        cn.ConnectionString = "Provider=MSOLEDBSQL;Data Source=" & servername & _
+        ";Initial Catalog=" & database & _
+        ";Integrated Security=SSPI;Trusted_Connection=yes;"
+    Else
+         cn.ConnectionString = "Provider=MSOLEDBSQL;Data Source=" & servername & _
+         ";Initial Catalog=" & database & ";User ID=" & userid & ";Password=" & pwd & ";TrustServerCertificate=yes;"
+    End If
+    
+    
+    
+
+    On Error GoTo ErrorHandler
+    
+    cn.ConnectionTimeout = 100
+    cn.Open
+    
+    If cn.State = adStateOpen Then
+        MsgBox "Connection has been tested successfully!!", vbOKOnly, "Connection Result"
+        cn.Close
+    End If
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Error:" & Err.Description, vbCritical, "Database connection failed"
+
+End Sub
+Sub btnGetHeaders()
+    Dim table_name As String, queryString As String, i As Integer
+    Dim cn As ADODB.Connection
+    Dim rs As ADODB.Recordset
+    Dim fid As ADODB.FieldAttributeEnum
+    Dim mssql As String
+    
+    Dim servername As String
+    Dim userid As String
+    Dim pwd As String
+    Dim database As String
+    
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets("QueryBulder")
+    
+    
+    servername = Sheets("SQLParams").Range("B2")
+    userid = Sheets("SQLParams").Range("B3")
+    pwd = Sheets("SQLParams").Range("B4")
+    database = Sheets("SQLParams").Range("B5")
+    
+    Set cn = New ADODB.Connection
+    Set rs = New ADODB.Recordset
+    
+     If Sheets("SQLParams").Range("C5").Value = True Then
+        cn.ConnectionString = "Provider=MSOLEDBSQL;Data Source=" & servername & _
+        ";Initial Catalog=" & database & _
+        ";Integrated Security=SSPI;Trusted_Connection=yes;"
+    Else
+         cn.ConnectionString = "Provider=MSOLEDBSQL;Data Source=" & servername & _
+         ";Initial Catalog=" & database & ";User ID=" & userid & ";Password=" & pwd & ";TrustServerCertificate=yes;"
+    End If
+    
+    On Error GoTo ErrorHandler
+    table_name = ws.Cells(2, 3)
+    
+    queryString = "SELECT * FROM " & table_name & " WHERE 1=0"
+    cn.Open
+    
+    rs.Open queryString, cn
+    ws.Rows(12).EntireRow.Clear
+    Rows("13:" & Rows.Count).ClearContents
+    For i = 0 To rs.Fields.Count - 1
+        ws.Cells(12, i + 1).Value = rs.Fields(i).Name
+        ws.Cells(12, i + 1).Borders.LineStyle = xlContinuous
+        ws.Columns(i + 1).AutoFit
+    Next i
+    With ws.Rows(12)
+        .Font.Bold = True
+        .Interior.Color = RGB(220, 220, 220)
+    End With
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Error:" & Err.Description, vbCritical, "Database connection failed"
+    
+End Sub
+
+Sub btnShowData()
+    Dim table_name As String, queryString As String, i As Integer
+    Dim cn As ADODB.Connection
+    Dim rs As ADODB.Recordset
+    Dim fid As ADODB.FieldAttributeEnum
+    Dim mssql As String
+    
+    Dim servername As String
+    Dim userid As String
+    Dim pwd As String
+    Dim database As String
+    
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets("QueryBulder")
+    
+    
+    servername = Sheets("SQLParams").Range("B2")
+    userid = Sheets("SQLParams").Range("B3")
+    pwd = Sheets("SQLParams").Range("B4")
+    database = Sheets("SQLParams").Range("B5")
+    
+    Set cn = New ADODB.Connection
+    Set rs = New ADODB.Recordset
+    
+     If Sheets("SQLParams").Range("C5").Value = True Then
+        cn.ConnectionString = "Provider=MSOLEDBSQL;Data Source=" & servername & _
+        ";Initial Catalog=" & database & _
+        ";Integrated Security=SSPI;Trusted_Connection=yes;"
+    Else
+         cn.ConnectionString = "Provider=MSOLEDBSQL;Data Source=" & servername & _
+         ";Initial Catalog=" & database & ";User ID=" & userid & ";Password=" & pwd & ";TrustServerCertificate=yes;"
+    End If
+    
+    On Error GoTo ErrorHandler
+    table_name = ws.Cells(2, 3)
+    
+    queryString = ws.Cells(5, 3)
+    cn.Open
+    
+    rs.Open queryString, cn
+    
+    ws.Rows(12).EntireRow.Clear
+    Rows("13:" & Rows.Count).ClearContents
+    For i = 0 To rs.Fields.Count - 1
+        ws.Cells(12, i + 1).Value = rs.Fields(i).Name
+        ws.Cells(12, i + 1).Borders.LineStyle = xlContinuous
+        ws.Columns(i + 1).AutoFit
+    Next i
+    With ws.Rows(12)
+        .Font.Bold = True
+        .Interior.Color = RGB(220, 220, 220)
+    End With
+    
+    ws.Cells(13, 1).CopyFromRecordset rs
+    ws.UsedRange.EntireColumn.AutoFit
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Error:" & Err.Description, vbCritical, "Database connection failed"
+End Sub
