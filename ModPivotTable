@@ -1,0 +1,55 @@
+Option Explicit
+Sub CreatePivotTable()
+
+Dim ws As Worksheet
+Dim wb As Workbook
+Dim pc As PivotCache
+Dim pt As PivotTable
+Dim lastRow As Long, lastCol As Long
+
+Set wb = ThisWorkbook
+Set ws = wb.Worksheets("QueryBulder")
+clearPivotTable
+lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+lastCol = ws.Cells(12, ws.Columns.Count).End(xlToLeft).Column
+
+On Error GoTo ErrorHandler
+
+Set pc = wb.PivotCaches.Create( _
+    SourceType:=xlDatabase, _
+    SourceData:=ws.Range(ws.Cells(12, 1), ws.Cells(lastRow, lastCol)), _
+    Version:=xlPivotTableVersion15)
+Set pt = wb.Worksheets("PivotVBA").PivotTables.Add( _
+    PivotCache:=pc, _
+    TableDestination:=wb.Worksheets("PivotVBA").Range("D4"), _
+    TableName:="Sales Analysis")
+
+With pt
+.PivotFields("Shipcountry").Orientation = xlRowField
+.PivotFields("Shipcountry").Caption = "ShipCountry"
+
+.PivotFields("Categoryname").Orientation = xlColumnField
+.PivotFields("CategoryName").Caption = "Category"
+'.PivotFields("Region").Orientation = xlPageField
+.PivotFields("UnitPrice").Orientation = xlDataField
+
+End With
+
+Exit Sub
+ErrorHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description
+
+End Sub
+
+Sub clearPivotTable()
+
+Dim wb As Workbook
+Dim wsPivot As Worksheet
+
+Set wb = ThisWorkbook
+Set wsPivot = wb.Worksheets("PivotVBA")
+
+If wsPivot.PivotTables.Count > 0 Then
+    wsPivot.PivotTables(1).TableRange2.Clear
+End If
+End Sub
