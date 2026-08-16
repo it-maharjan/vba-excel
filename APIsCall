@@ -1,0 +1,49 @@
+Option Explicit
+
+Sub SendAPIrequest()
+
+    Dim HTTPReq As Object, url As String, response As String, Country As String
+        
+    Set HTTPReq = CreateObject("MSXML2.XMLHTTP")
+    Country = "Canada"
+    url = "http://universities.hipolabs.com/search?country=" & Country
+    
+    With HTTPReq
+        .Open "GET", url, False
+        .send
+    End With
+    
+    response = HTTPReq.responseText
+    Debug.Print response
+    Call ReadJSONresponse(response, "name", "A")
+    Call ReadJSONresponse(response, "alpha_two_code", "B")
+    Call ReadJSONresponse(response, "domains", "C")
+    Call ReadJSONresponse(response, "state-province", "D")
+End Sub
+
+
+Sub ReadJSONresponse(response As String, term As String, col As String)
+    Dim findterm As Integer, searchstart As Integer, startpos As Integer, endpos As Integer, termval As String, r As Integer
+           
+    
+    r = 2
+    searchstart = 1
+    Range(col & "1").Value = term
+    Do
+        findterm = InStr(searchstart, response, term)
+        If findterm > 0 Then
+            searchstart = findterm + 1
+        Else
+            Exit Do
+        End If
+        
+        startpos = InStr(searchstart, response, ":") + 1
+        endpos = InStr(searchstart, response, ",") - 1
+        termval = Mid(response, startpos, endpos - startpos + 1)
+        termval = Replace(termval, Chr(34), "")
+        
+        r = r + 1
+        Range(col & r).Value = termval
+    Loop
+    
+End Sub
